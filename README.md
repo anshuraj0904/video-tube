@@ -6,7 +6,10 @@
 4. Creating proper utils for reusability of the code, mainly for async handling(as, using the Express, we'll be creating API endpoints using async functions).
 5. Creating proper error handling, which will help in easy maintenance of the code, and, it will also help in easy debugging of the code.
 6. In the models folder, for each table of the database, a model should be created, which will help in easy maintenance of the code, and, it will also help in easy debugging of the code. Note:- We've used .models.js for creating models.
-
+7. Each model will have a controller and each controller will have a route handler.
+``` flow
+          model -> controller -> route
+```          
 
 
 # Our folder Structure:-
