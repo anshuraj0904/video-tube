@@ -4,6 +4,8 @@ const asyncHandler = (requestHandler)=>{
    return (req, res, next)=>{     // Note:- next is a middleware
           Promise.resolve(requestHandler(req,res,next))
           .catch((err)=> next(err))
+          console.log(`Works fine from the async handler too and made this change!`);
+          
    }
 }
 // This one above is a HOF, that takes a function named requestHandler and returns a function which when resolved, return the request, the response and the middleware, but, when there's an error, it returns the error via the middle ware.
