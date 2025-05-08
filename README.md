@@ -15,6 +15,7 @@
 # Our folder Structure:-
 ```
 .
+├── .env
 ├── README.md
 ├── src
 │   ├── controllers
@@ -26,8 +27,10 @@
 │   ├── app.js
 │   ├── index.js
 │   ├── constants.js
-│   └── .env
+│   
 └── package.json
+
+Note:- This is a standard folder structure for any good full fledged MERN stack application(backend). 
 ```
 
 
@@ -36,4 +39,9 @@
      npm init
      npm install express cors dotenv mongoose
      npm install nodemon --save-dev
-```
+     ```
+
+# Things to be installed as we move forward:-
+``` bash
+     npm i mongoose-aggregate-paginate-v2 # This will help in easy pagination of the results but, more than that, it'll help us in mongoose aggregate pipeline. 
+```     
