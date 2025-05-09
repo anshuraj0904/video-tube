@@ -55,3 +55,6 @@ Note:- This is a standard folder structure for any good full fledged MERN stack 
 # Next up, we'll be writing middllewares for the database, for example, for encrypting the password. And, for this, we'll be using bcrypt or bcryptjs.
 # Note- We have hooks in mongoose too, and, middleware is a sub-part of mongoose hooks. We've pre-hook and post-hook in mongoose hooks. 
 # Imp:- we'll use 10 rounds for encrypting the password, though the standard number is 12. 
+
+
+# Note:- We'll have a route for every controller. 
