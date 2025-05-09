@@ -14,6 +14,8 @@ id pk string
 
 // We'll be defining the user table here:-
 import mongoose, {Schema} from "mongoose";
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
 
 const userSchema = new Schema(
     {
@@ -67,6 +69,30 @@ const userSchema = new Schema(
     {timestamps:true} // This will automatically create two columns named createdAt and updatedAt in the schema, and, this is such a good thing on offer by mongoose.
     // Note:- This is after all the columns are defined and basically outside of that.
 )
+
+// Writing a mongoose hook/middleware for encrypting the password.
+userSchema.pre("save", async function(next) // next because middleware.
+{
+  if(!this.modified("password")) // That is, if the password is not getting modified, then, we'll use this which is to return the next().
+  // Also, when we're saving the user details for the first time, then, we're not modifying it, but, we're saving it. So, it'll work for that as well.
+  {
+    return next()
+  }
+   this.password = bcrypt.hash(this.password, 12) // 12 is the number of rounds of hashing that we're doing.
+   
+   next()
+})
+// save is a pre-defined event in pre. 
+//pre means pre hook.
+
+userSchema.methods.isPasswordCorrect = async function(password){
+   return await bcrypt.compare(password, this.password) // This function is for comparing the original password with the password which is being entered by the user in the login page.
+}
+
+// Next up, we'll be cretaing methods to get the Access tokens(short lived) and refresh tokens.
+// userSchema.methods.generateAccessToken = function(){
+   // 
+// }
 
 
 export const User = mongoose.model("User", userSchema)

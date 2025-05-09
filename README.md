@@ -44,4 +44,10 @@ Note:- This is a standard folder structure for any good full fledged MERN stack 
 # Things to be installed as we move forward:-
 ``` bash
      npm i mongoose-aggregate-paginate-v2 # This will help in easy pagination of the results but, more than that, it'll help us in mongoose aggregate pipeline. 
+     npm i bcrypt # This will be used for encrypting the password, which will also be a part of the mongoose middleware.
 ```     
+
+
+# Next up, we'll be writing middllewares for the database, for example, for encrypting the password. And, for this, we'll be using bcrypt or bcryptjs.
+# Note- We have hooks in mongoose too, and, middleware is a sub-part of mongoose hooks. We've pre-hook and post-hook in mongoose hooks. 
+# Imp:- we'll use 10 rounds for encrypting the password, though the standard number is 12. 
