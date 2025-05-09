@@ -45,6 +45,10 @@ Note:- This is a standard folder structure for any good full fledged MERN stack 
 ``` bash
      npm i mongoose-aggregate-paginate-v2 # This will help in easy pagination of the results but, more than that, it'll help us in mongoose aggregate pipeline. 
      npm i bcrypt # This will be used for encrypting the password, which will also be a part of the mongoose middleware.
+     npm i cookie-parser # This will be used for parsing the cookies.
+     npm i jsonwebtoken # This will be used for authentication.
+     npm i multer # This will be used for uploading files using multipart/form-data(mainly for images/urls/avatars).
+     npm i cloudinary # This will be used for uploading files to cloudinary.
 ```     
 
 
