@@ -90,10 +90,26 @@ userSchema.methods.isPasswordCorrect = async function(password){
 }
 
 // Next up, we'll be cretaing methods to get the Access tokens(short lived) and refresh tokens.
-// userSchema.methods.generateAccessToken = function(){
-   // 
-// }
+userSchema.methods.generateAccessToken = function(){
+   // Short-lived token
+   return jwt.sign({
+    _id : this._id,
+    email:this.email,
+    fullName:this.fullName
+   },
+  process.env.ACCESS_TOKEN_SECRET,
+  {expiresIn : process.env.ACCESS_TOKEN_EXPIRY}
+)}
 
+
+userSchema.methods.generateRefreshToken = function(){
+  // This one's a long lived one
+  return jwt.sign({
+    _id:this._id
+  },
+   process.env.REFRESH_TOKEN_SECRET,
+   { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+)}
 
 export const User = mongoose.model("User", userSchema)
 // The part mongoose.model("user", userSchema) will create a table named User using the credentials passed in the userSchema by us. And, the export part is just for it to be used at different places.
