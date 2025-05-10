@@ -7,7 +7,7 @@ import { upload } from "../middlewares/multer.middlewares.js";
 
 const router = Router()
 
-// This one's important, wherein we'll be defining the place where we wantto serve the following route.
+// This one's important, wherein we'll be defining the place where we want to serve the following route.
 router.route("/register").post(
         upload.fields({
             name:"avatar",
