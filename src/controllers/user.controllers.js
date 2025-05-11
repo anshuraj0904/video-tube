@@ -8,6 +8,8 @@ import {
 } from "../utils/cloudinary.js"
 import { warn } from "console"
 
+import validator from "validator"
+
 const registerUser = asyncHandler(async (req, res) => {
   // Let us now write the business logic here:-
 
@@ -27,6 +29,11 @@ const registerUser = asyncHandler(async (req, res) => {
     )
   ) {
     throw new ApiError(400, "Some of the fields are empty!")
+  }
+
+  if(!validator.isEmail(email))
+  {
+    throw new ApiError(400, "Please provide a valid email !")
   }
 
   const isUserExisting = await User.findOne({
@@ -109,4 +116,44 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 })
 
-export { registerUser }
+
+const loginUser = asyncHandler(async(req,res)=>{
+  if(!req.body)
+  {
+    throw new ApiError(400, "Request body is empty!")
+  }
+  const {emailorusername, password} =req.body
+
+  if(!emailorusername || !password)
+  {
+    throw new ApiError(400, "Either of email or password is missing!")
+  }
+  let isUser
+
+  if(validator.isEmail(emailorusername))
+  {
+     isUser = await User.findOne({email:emailorusername})
+  }
+  else{
+    isUser = await User.findOne({username:emailorusername})
+  }
+    
+
+  if(!isUser)
+  {
+    throw new ApiError(404, "User not found!")
+  }
+
+  // Checking for if the password mateches or not:-
+  const isPassmatching = await isUser.isPasswordCorrect(password)
+  if(!isPassmatching)
+  {
+    throw new ApiError(400,"Incorrect Password !")
+  }
+
+  return res
+         .status(200)
+         .json(new ApiResponse(200, isUser, "Logged in successfully!"))
+})
+
+export { registerUser, loginUser }

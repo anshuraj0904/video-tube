@@ -78,7 +78,7 @@ userSchema.pre("save", async function(next) // next because middleware.
   {
     return next()
   }
-   this.password = bcrypt.hash(this.password, 12) // 12 is the number of rounds of hashing that we're doing.
+   this.password = await bcrypt.hash(this.password, 12) // 12 is the number of rounds of hashing that we're doing.
    
    next()
 })

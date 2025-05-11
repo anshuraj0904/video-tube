@@ -49,6 +49,7 @@ Note:- This is a standard folder structure for any good full fledged MERN stack 
      npm i jsonwebtoken # This will be used for authentication.
      npm i multer # This will be used for uploading files using multipart/form-data(mainly for images/urls/avatars).
      npm i cloudinary # This will be used for uploading files to cloudinary.
+     npm i validator # This will be used for validating the data, right now, we've used it just for the email validation.
 ```     
 
 
