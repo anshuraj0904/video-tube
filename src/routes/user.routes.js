@@ -9,14 +9,14 @@ const router = Router()
 
 // This one's important, wherein we'll be defining the place where we want to serve the following route.
 router.route("/register").post(
-        upload.fields({
+        upload.fields([{
             name:"avatar",
             maxCount:1
         },
     {
         name:"coverImage",
         maxCount:1
-    }),
+    }]),
         registerUser)
 
 

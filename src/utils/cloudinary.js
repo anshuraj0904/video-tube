@@ -2,6 +2,9 @@
 
 import { v2 as cloudinary } from 'cloudinary';
 import fs from "fs"
+import dotenv from "dotenv"
+
+dotenv.config()
 
 // Configuring Cloudinary:-
 cloudinary.config({
@@ -34,4 +37,16 @@ const uploadOnCloudinary = async (localFilePath)=>{
     }
 }
 
-export {uploadOnCloudinary}
+
+// Method to delete the uploaded avatar and the coverImage from cloudinary, in case if the user doesn't get created successfully!
+const deleteFromCloudinary = async function(publicId){
+  try {
+     const result = await cloudinary.uploader.destroy(publicId)
+     console.log(`Deleted from cloudinary. Public Id: ${result}`);
+     
+  } catch (error) {
+    console.log(`Error deleting from cloudinary: ${error}`);
+    
+  }
+}
+export {uploadOnCloudinary, deleteFromCloudinary}
