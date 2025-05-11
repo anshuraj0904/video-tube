@@ -73,7 +73,7 @@ const userSchema = new Schema(
 // Writing a mongoose hook/middleware for encrypting the password.
 userSchema.pre("save", async function(next) // next because middleware.
 {
-  if(!this.modified("password")) // That is, if the password is not getting modified, then, we'll use this which is to return the next().
+  if(!this.isModified("password")) // That is, if the password is not getting modified, then, we'll use this which is to return the next().
   // Also, when we're saving the user details for the first time, then, we're not modifying it, but, we're saving it. So, it'll work for that as well.
   {
     return next()
