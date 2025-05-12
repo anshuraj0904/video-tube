@@ -117,6 +117,30 @@ const registerUser = asyncHandler(async (req, res) => {
 })
 
 
+
+const getTokens = async (userId)=>{
+  try {
+    const user = await User.findById(userId)
+    
+    if(!user)
+    {
+      throw new ApiError(404, "User not found!")
+    }
+    
+    const refresh_token = user.generateRefreshToken()
+    const access_token = user.generateAccessToken() 
+  
+    user.refreshToken = refresh_token
+    await user.save({validateBeforeSave : false})
+  
+      
+    return {refresh_token, access_token}
+  } catch (error) {
+    throw new ApiError(500, "Error setting and getting the tokens!")
+  }
+}
+
+
 const loginUser = asyncHandler(async(req,res)=>{
   if(!req.body)
   {
@@ -150,10 +174,28 @@ const loginUser = asyncHandler(async(req,res)=>{
   {
     throw new ApiError(400,"Incorrect Password !")
   }
+  
+  const {refresh_token, access_token} = await getTokens(isUser._id)
+  
+  const loggedInUser = await User.findById(isUser._id)
+                       .select("-password -refreshToken")
+
+
+  if(!loggedInUser)
+    {
+      throw new ApiError(404, "User not logged in!") 
+    }   
+  
+    const options = {
+      httpOnly : true,
+      secure : process.env.NODE_ENV === "production"
+    }
 
   return res
          .status(200)
-         .json(new ApiResponse(200, isUser, "Logged in successfully!"))
+         .cookie("accessToken", access_token, options)
+         .cookie("refreshToken", refresh_token, options)
+         .json(new ApiResponse(200, loggedInUser, "Logged in successfully!"))
 })
 
 export { registerUser, loginUser }
