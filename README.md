@@ -53,11 +53,17 @@ Note:- This is a standard folder structure for any good full fledged MERN stack 
 ```     
 
 
-# Next up, we'll be writing middllewares for the database, for example, for encrypting the password. And, for this, we'll be using bcrypt or bcryptjs.
-# Note- We have hooks in mongoose too, and, middleware is a sub-part of mongoose hooks. We've pre-hook and post-hook in mongoose hooks. 
-# Imp:- we'll use 10 rounds for encrypting the password, though the standard number is 12. 
+``` markdown
+--> Some important points w.r.t flow of tasks:-
+
+1. Next up, we'll be writing middlewares for the database, for example, for encrypting the password. And, for this, we'll be using bcrypt or bcryptjs.
+
+2. Note- We have hooks in mongoose too, and, middleware is a sub-part of mongoose hooks. We've pre-hook and post-hook in mongoose hooks. 
+
+3 Imp:- we'll use 10 rounds for encrypting the password, though the standard number is 12. 
 
 
-# Note:- We'll have a route for every controller. 
-# Imp:- Whole mechanism of user talking to the database happens only and only through the access token.
-# Suppose, if the time for access_token is 15 minutes only, that means the user will have to re-login after every 15 minutes and that'll be pretty annoying, so, we'll have too write a route, which will regenerate the access and refresh token for the user, when triggered with a special code. And, this will be done by matching the existing refresh_token in the db with the one in cookies.
+** Note:- We'll have a route for every controller. 
+** Imp:- Whole mechanism of user talking to the database happens only and only through the access token.
+4. Suppose, if the time for access_token is 15 minutes only, that means the user will have to re-login after every 15 minutes and that'll be pretty annoying, so, we'll have too write a route, which will regenerate the access and refresh token for the user, when triggered with a special code. And, this will be done by matching the existing refresh_token in the db with the one in cookies.
+```
