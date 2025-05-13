@@ -259,6 +259,44 @@ const loginUser = asyncHandler(async(req,res)=>{
          // This line below will work well for the mobile ussers of our application, as, there's nothing like cookies in the mobile apps. 
 })
 
+// Mehtod to logout:-
+const logoutUser = asyncHandler(async(req,res)=>{
+
+  const user = await User.findById(req.user?._id)
+
+  /*
+  // if(!user)
+  // {
+  //   throw new ApiError(401, "You need to be logged in first, in order to hit this logout route!")
+  // }
+
+  This part of code above which I have commented out is not needed because,verifyJWT in the auth.middlewares.js already takes care of that! 
+  */
+ 
+
+  await User.findByIdAndUpdate(req.user?._id,
+    {
+      $unset:{
+        refreshToken: 1 // This removes the field from document.
+      }
+    },
+    {
+      new:true
+    }
+  )
+
+  const options = {
+    httpOnly:true,
+    secure:true
+  }
+
+  return res
+         .status(200)
+         .clearCookie("accessToken", options)
+         .clearCookie("refreshToken", options)
+         .json(new ApiResponse(200, {},"User loggeed out successfully!"))
+})
+
 
 // method for changing the password:-
 const changeLoginPassword = asyncHandler(async(req,res)=>{
@@ -302,4 +340,4 @@ const changeLoginPassword = asyncHandler(async(req,res)=>{
          .json(new ApiResponse(200, {}, "Password Changed successfully!"))
 })
 
-export { registerUser, loginUser, refreshAccessToken, changeLoginPassword }
+export { registerUser, loginUser, refreshAccessToken, changeLoginPassword, logoutUser }
