@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { registerUser, loginUser } from "../controllers/user.controllers.js";
+import { registerUser, loginUser, refreshAccessToken, changeLoginPassword } from "../controllers/user.controllers.js";
 
 import { upload } from "../middlewares/multer.middlewares.js";
 
@@ -22,5 +22,6 @@ router.route("/register").post(
 
 router.route('/login').post(loginUser)        
 
+router.route('/update-password').post(changeLoginPassword)
 
 export default router        

@@ -10,7 +10,6 @@ import { warn } from "console"
 
 import validator from "validator"
 import jwt from "jsonwebtoken"
-import { use } from "react"
 
 const registerUser = asyncHandler(async (req, res) => {
   // Let us now write the business logic here:-
@@ -199,6 +198,8 @@ const refreshAccessToken = asyncHandler(async(req, res)=>
 
 })
 
+
+// Method for logging in the user:-
 const loginUser = asyncHandler(async(req,res)=>{
   if(!req.body)
   {
@@ -226,7 +227,7 @@ const loginUser = asyncHandler(async(req,res)=>{
     throw new ApiError(404, "User not found!")
   }
 
-  // Checking for if the password mateches or not:-
+  // Checking for if the password matches or not:-
   const isPassmatching = await isUser.isPasswordCorrect(password)
   if(!isPassmatching)
   {
@@ -258,4 +259,47 @@ const loginUser = asyncHandler(async(req,res)=>{
          // This line below will work well for the mobile ussers of our application, as, there's nothing like cookies in the mobile apps. 
 })
 
-export { registerUser, loginUser, refreshAccessToken }
+
+// method for changing the password:-
+const changeLoginPassword = asyncHandler(async(req,res)=>{
+
+  if(!req.body)
+  {
+    throw new ApiError(404,"Enter the old and new password for updating the password!")
+  }
+  const {oldPasscode, newPasscode} = req.body
+
+  if(!oldPasscode || !newPasscode)
+  {
+    throw new ApiError(404, "Enter both old and new password!")
+  }
+
+  if(String(oldPasscode) === String(newPasscode))
+  {
+    throw new ApiError(409, "New Password must be different from the existing one!")
+  }
+
+  const isUser =User.findById(req.user?._id)
+
+  if(!isUser)
+  {
+    throw new ApiError(401,"User doesn't exist!")
+  }
+
+  // Checking if we've entered the correct password or not:-
+  const isPasswordValid = await isPasswordCorrect(oldPasscode)
+
+  if(!isPasswordValid)
+  {
+    throw new ApiError(401, "Old Password is invalid!")
+  }
+
+  isUser.password = newPasscode
+  await isUser.save({ validateBeforeSave:false })
+
+  return res
+         .status(200)
+         .json(new ApiResponse(200, {}, "Password Changed successfully!"))
+})
+
+export { registerUser, loginUser, refreshAccessToken, changeLoginPassword }
