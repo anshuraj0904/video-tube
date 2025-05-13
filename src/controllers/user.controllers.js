@@ -146,7 +146,7 @@ const getTokens = async (userId)=>{
 const refreshAccessToken = asyncHandler(async(req, res)=>
 {
   // Here, at the very first, we need to get the refresh_token from the cookies to see if the user is still logged in or not.
-  const { incomingRefreshToken } = req.cookie.refreshToken || req.body.refreshToken
+  const { incomingRefreshToken } = req.cookies.refreshToken || req.body.refreshToken
   // Remember, the refreshToken has the _id of the current user.
   
   // We'll now need to make a check if the current user is logged in or not, by matching the incomingRefreshToken with the existing refreshToken in the db.
