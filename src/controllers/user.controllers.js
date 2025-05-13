@@ -9,6 +9,8 @@ import {
 import { warn } from "console"
 
 import validator from "validator"
+import jwt from "jsonwebtoken"
+import { use } from "react"
 
 const registerUser = asyncHandler(async (req, res) => {
   // Let us now write the business logic here:-
@@ -131,7 +133,7 @@ const getTokens = async (userId)=>{
     const access_token = user.generateAccessToken() 
   
     user.refreshToken = refresh_token
-    await user.save({validateBeforeSave : false})
+    await user.save({validateBeforeSave : false})  // Saving the refreshToken into the database for the user.
   
       
     return {refresh_token, access_token}
@@ -140,6 +142,62 @@ const getTokens = async (userId)=>{
   }
 }
 
+
+const refreshAccessToken = asyncHandler(async(req, res)=>
+{
+  // Here, at the very first, we need to get the refresh_token from the cookies to see if the user is still logged in or not.
+  const { incomingRefreshToken } = req.cookie.refreshToken || req.body.refreshToken
+  // Remember, the refreshToken has the _id of the current user.
+  
+  // We'll now need to make a check if the current user is logged in or not, by matching the incomingRefreshToken with the existing refreshToken in the db.
+  if(!incomingRefreshToken)
+  {
+    throw new ApiError(400, "No refresh token found, user might have logged out!")
+  }
+
+  try {
+    const decodedToken = jwt.verify(
+      incomingRefreshToken,
+    process.env.REFRESH_TOKEN_SECRET
+    ) 
+   if(!decodedToken)
+   {
+    throw new ApiError(400, "Not verified!")
+   }
+    const user = await User.findById(decodedToken?._id)
+
+  if(!user)
+    {
+      throw new ApiError(401, "Invalid Refresh Token!")
+    } 
+    
+  if(incomingRefreshToken !== user?.refreshToken)
+    {
+      throw new ApiError(401,"Invalid Refresh Token!")
+    }  
+
+   // Next up, we'll re-generate the access and refresh tokens and before that, we'll delete the existing refresh token from the db and cookies and then set-up the new ones.
+  const options = {
+    httpOnly:true,
+    secure: process.env.NODE_ENV === "production"
+  }
+
+  const {access_token, refresh_token:newRefreshToken}  =await getTokens(user._id)
+  // Since, getTokens() method is saving the refreshToken in the db, so, we don't need to worry about that part of, if the refresh token is getting updated in the db or not, it is already being taken care of. 
+
+  return res.status(200)
+            .cookie("accessToken", access_token, options)
+            .cookie("refreshToken", newRefreshToken, options)
+            .json(new ApiResponse(200, 
+              {access_token,
+               refresh_token: newRefreshToken}, 
+              "Tokens refreshed!")) 
+
+  } catch (error) {
+    throw new ApiError(500, "Some error while refreshing the access token and the refresh token!")
+  }
+
+})
 
 const loginUser = asyncHandler(async(req,res)=>{
   if(!req.body)
@@ -196,6 +254,8 @@ const loginUser = asyncHandler(async(req,res)=>{
          .cookie("accessToken", access_token, options)
          .cookie("refreshToken", refresh_token, options)
          .json(new ApiResponse(200, loggedInUser, "Logged in successfully!"))
+        //  .json(new ApiResponse(200, {user:loggedInUser, cookie:{"refreshToken":refresh_token,"accessToken": access_token}}, "Logged In Successfully!"))
+         // This line below will work well for the mobile ussers of our application, as, there's nothing like cookies in the mobile apps. 
 })
 
-export { registerUser, loginUser }
+export { registerUser, loginUser, refreshAccessToken }

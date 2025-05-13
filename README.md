@@ -59,3 +59,5 @@ Note:- This is a standard folder structure for any good full fledged MERN stack 
 
 
 # Note:- We'll have a route for every controller. 
+# Imp:- Whole mechanism of user talking to the database happens only and only through the access token.
+# Suppose, if the time for access_token is 15 minutes only, that means the user will have to re-login after every 15 minutes and that'll be pretty annoying, so, we'll have too write a route, which will regenerate the access and refresh token for the user, when triggered with a special code. And, this will be done by matching the existing refresh_token in the db with the one in cookies.
