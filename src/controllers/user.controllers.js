@@ -10,6 +10,7 @@ import { warn } from "console"
 
 import validator from "validator"
 import jwt from "jsonwebtoken"
+import { Mongoose } from "mongoose"
 
 const registerUser = asyncHandler(async (req, res) => {
   // Let us now write the business logic here:-
@@ -439,12 +440,12 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
       },
       { new: true }
     ).select("-password -refreshToken")
-  
+
     return res
       .status(200)
       .json(new ApiResponse(200, user, "User avatar updated successfully!"))
   } catch (error) {
-         throw new ApiError(400,"Something went wrong while updating the avatar!")
+    throw new ApiError(400, "Something went wrong while updating the avatar!")
   }
 })
 
@@ -468,7 +469,7 @@ const updateCoverImage = asyncHandler(async (req, res) => {
   const publicId = getPublicIdFromUrl(userDets.coverImage)
 
   await deleteFromCloudinary(publicId)
-  
+
   try {
     const user = await User.findByIdAndUpdate(
       req.user?._id,
@@ -479,15 +480,163 @@ const updateCoverImage = asyncHandler(async (req, res) => {
       },
       { new: true }
     ).select("-password -refreshToken")
-    
+
     return res
       .status(200)
-      .json(new ApiResponse(200, user, "User cover Image updated successfully!"))
+      .json(
+        new ApiResponse(200, user, "User cover Image updated successfully!")
+      )
   } catch (error) {
-     throw new ApiError(400,"Something went wrong while updating the cover Image!") 
+    throw new ApiError(
+      400,
+      "Something went wrong while updating the cover Image!"
+    )
+  }
+})
+
+// Let us write down a few aggregation pipelines for a particular user for example, getting the list of subscribers of a user, his all the comments, his videos(uploaded by him and watched by him).
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  const { username } = req.params
+
+  if (!username?.trim()) {
+    throw new ApiError(400, "Username is required!")
   }
 
+  const channelInfo = await User.aggregate([
+    {
+      $match: {
+        username: username?.toLowerCase(),
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel", // As the subscriptions table has channels column which gives the list of the channels who've subscribed to me.
+        as: "subscribers",
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscribers",
+        as: "subscribedTo",
+      },
+    },
+    {
+      $addFields: {
+        subscribersCount: {
+          $size: "$subscribers",
+        },
+        channelsSubscribedToCount: {
+          $size: "$subscribedTo",
+        },
+        isSubscribed: {
+          $cond: {
+            if: {
+              $in: [
+                req.user?._id,
+                {
+                  $map: {
+                    input: "$subscribers",
+                    as: "s",
+                    in: "$$s.subscriber",
+                  },
+                },
+              ],
+            },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    {
+      // Project only the necessary data:-
+      $project: {
+        fullName: 1,
+        username: 1,
+        avatar: 1,
+        subscribersCount: 1,
+        channelsSubscribedToCount: 1,
+        isSubscribed: 1,
+        email: 1,
+      },
+    },
+  ])
 
+  if (!channelInfo?.length) {
+    throw new ApiError(404, "Channel not found!")
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        channelInfo[0],
+        "Channel Profile Info Fetched Successfully!"
+      )
+    )
+})
+
+const getWatchHistory = asyncHandler(async (req, res) => {
+  const userWatchInfo = await User.aggregate([
+    {
+      $match: {
+        _id: new Mongoose.Types.ObjectId(req.user?._id),
+      },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "watchHistory",
+        // Here, we're creating a pipeline within the pipeline over here, for getting limited data, as, we want to get the owner's name of the videos that the current user has seen.
+
+        pipeline: [
+          {
+            $lookup: {
+              from: "users", // Note:- Here, we're able to give the from as users, because we're in the sub-pipeline, for which the output is a lookup where we've from as videos, so, for this one, that from of the above one becomes the table we're aggregating upon.
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+
+              pipeline: [
+                {
+                  $project: {
+                    username: 1,
+                    avatar: 1,
+                    fullName: 1,
+                    // These, the username, avatar and the fullName are of the owner of the videos that we've wateched
+                  },
+                },
+              ],
+            },
+          },
+
+          {
+            $addFields: {
+              owner:{
+                $arrayElemAt: ["$owner", 0],
+              }
+            },
+          },
+        ],
+      },
+    },
+  ])
+
+  if(!userWatchInfo?.length)
+  {
+    throw new ApiError(404,"Not found anything!")
+  }
+
+  return res
+         .status(200)
+         .json(new ApiResponse(200, userWatchInfo[0]?.watchHistory, "Fetched User's watch history Data!"))
 })
 
 export {
@@ -499,5 +648,7 @@ export {
   getCurrentUserDetails,
   updateCoverImage,
   updateAccountDetail,
-  updateUserAvatar
+  updateUserAvatar,
+  getUserChannelProfile,
+  getWatchHistory
 }
